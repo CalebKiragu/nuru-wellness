@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const ORIGIN = "http://localhost:3100";
 const AMANI = "http://amani.localhost:3100";
+const BAHARI = "http://bahari.localhost:3100";
 
 test.describe.configure({ mode: "serial" });
 
@@ -10,6 +11,22 @@ async function signInAsOwner(page: Page, label: RegExp) {
   await page.getByRole("button", { name: label }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 20_000 });
 }
+
+test("demo auto-login opens each workspace and admin without credentials", async ({ page, browser }) => {
+  await page.goto(`${AMANI}/dashboard`);
+  await expect(page.getByText(/Demo auto-login is on/)).toBeVisible();
+  await expect(page.getByText("Amani Bodywork").first()).toBeVisible();
+
+  await page.goto(`${BAHARI}/dashboard`);
+  await expect(page.getByText(/Demo auto-login is on/)).toBeVisible();
+  await expect(page.getByText("Bahari House").first()).toBeVisible();
+
+  const adminContext = await browser.newContext();
+  const adminPage = await adminContext.newPage();
+  await adminPage.goto(`${ORIGIN}/admin`);
+  await expect(adminPage.getByRole("heading", { name: "Platform overview" })).toBeVisible();
+  await adminContext.close();
+});
 
 test("a public booking appears immediately in the dashboard", async ({ page }) => {
   await page.goto(`${AMANI}/book/deep-tissue-reset`);

@@ -69,12 +69,14 @@ The confirmation page shows:
 
 ## 3. See it land in the business (1 min)
 
-1. Sign in at `/login` as **Amani Bodywork · Owner** (or use the one-click button).
+1. Open `/dashboard` directly. With `DEMO_AUTO_LOGIN=true` the demo signs you in as **Amani Bodywork · Owner** without credentials; a banner confirms auto-login is active.
 2. Open **Bookings** and search for the reference from step 2.
 3. Open the booking. Change the status to *confirmed* or reschedule it to another open slot.
 4. Open **Calendar** and switch between day and week views, filtering by therapist.
 
 **Talking point:** the client booking and the business record are the same row, with an audit trail for status and schedule changes.
+
+> If you want to demonstrate roles, open `/login` and use the one-click owner, manager, staff or platform-admin buttons. Those still create real sessions. Opening `/admin` directly auto-signs in as the platform admin in demo mode.
 
 ## 4. Let the assistant prepare work (2 min)
 

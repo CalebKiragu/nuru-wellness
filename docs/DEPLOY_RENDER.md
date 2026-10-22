@@ -48,6 +48,8 @@ Environment variables:
 | `NEXT_PUBLIC_APP_URL` | Yes | `https://<service>.onrender.com` or custom domain. Used in metadata and links. |
 | `ROOT_DOMAIN` | Recommended | `<service>.onrender.com` or your custom root domain. |
 | `DEMO_MODE` | Demo only | `true` enables demo sign-in, tenant switching, the demo directory and seeding. Use `false` for a real customer deployment. |
+| `DEMO_AUTO_LOGIN` | Demo only | Requires `DEMO_MODE=true`. Acts as the workspace owner without a session so the demo needs no sign-in. **Never enable on a deployment with real data.** |
+| `DEMO_AUTO_LOGIN_EMAIL` | No | Force a specific demo account instead of the active tenant's owner. |
 | `AI_PROVIDER` | No | `mock` (default) or `openai`. |
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | If OpenAI | Live model credentials. |
 | `RESEND_API_KEY` / `EMAIL_FROM` | If live email | Real outbound email. Without these, sends are `simulated`. |
@@ -107,7 +109,7 @@ The storefront resolves a tenant from the request hostname (plus the demo-switch
 - Sessions are database-backed; horizontal scaling works without sticky sessions.
 - Background jobs, reminders and campaign scheduling have no worker. Sending is explicit and synchronous.
 - Media is bundled in `public/media`; there is no upload or S3 adapter yet. Do not promise customer uploads.
-- The demo seed creates known accounts with a published password. Never enable `DEMO_MODE=true` on a deployment holding real customer data.
+- The demo seed creates known accounts with a published password. Demo mode can also auto-login as an owner. Never enable `DEMO_MODE`/`DEMO_AUTO_LOGIN` on a deployment holding real customer data.
 - Logs go to stdout/stderr and are available in Render's log stream. Health checks log failures with `health_check_failed`.
 
 ## 9. Rolling back

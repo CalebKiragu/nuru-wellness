@@ -7,6 +7,7 @@ import { ensureDb } from "@/db";
 import { tenantMemberships, sessions, tenants, users, type Tenant, type TenantRole, type User } from "@/db/schema";
 import { verifyPassword } from "./password";
 import { sha256 } from "@/lib/hash";
+import { getRequestHost, resolveTenantForHost } from "@/lib/tenant";
 import { env, assertServerSecret } from "@/lib/env";
 import { can, type Permission } from "./permissions";
 
@@ -61,7 +62,7 @@ export async function authenticate(email: string, password: string) {
   return ok ? user : null;
 }
 
-export const getCurrentUser = cache(async (): Promise<User | null> => {
+export const getSessionUser = cache(async (): Promise<User | null> => {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -73,6 +74,66 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
     .where(and(eq(sessions.tokenHash, sha256(token)), gt(sessions.expiresAt, new Date())))
     .limit(1);
   return rows[0]?.user ?? null;
+});
+
+/**
+ * Demo-only convenience: when DEMO_AUTO_LOGIN is on, resolve a workspace owner
+ * without a session so the public demo can be explored without signing in.
+ * This is deliberately gated on DEMO_MODE and must never be used with real data.
+ */
+async function getDemoAutoLoginUser(): Promise<User | null> {
+  if (!env.demoMode || !env.demoAutoLogin) return null;
+  const db = await ensureDb();
+
+  if (env.demoAutoLoginEmail) {
+    const [selected] = await db.select().from(users).where(eq(users.email, env.demoAutoLoginEmail)).limit(1);
+    if (selected) return selected;
+  }
+
+  const hostTenant = await resolveTenantForHost(await getRequestHost());
+  const store = await cookies();
+  const selectedTenantId = store.get(TENANT_COOKIE)?.value;
+  let tenant: Tenant | null = hostTenant;
+
+  if (!tenant && selectedTenantId) {
+    const [selected] = await db.select().from(tenants).where(eq(tenants.id, selectedTenantId)).limit(1);
+    tenant = selected ?? null;
+  }
+
+  if (tenant) {
+    const [owner] = await db
+      .select({ user: users })
+      .from(tenantMemberships)
+      .innerJoin(users, eq(users.id, tenantMemberships.userId))
+      .where(and(eq(tenantMemberships.tenantId, tenant.id), eq(tenantMemberships.role, "owner")))
+      .limit(1);
+    if (owner?.user) return owner.user;
+
+    const [member] = await db
+      .select({ user: users })
+      .from(tenantMemberships)
+      .innerJoin(users, eq(users.id, tenantMemberships.userId))
+      .where(eq(tenantMemberships.tenantId, tenant.id))
+      .limit(1);
+    if (member?.user) return member.user;
+  }
+
+  const [fallback] = await db.select().from(users).where(eq(users.email, "owner@amani.demo")).limit(1);
+  return fallback ?? null;
+}
+
+export const getCurrentUser = cache(async (): Promise<User | null> => {
+  return (await getSessionUser()) ?? (await getDemoAutoLoginUser());
+});
+
+/** Platform admin pages also work without a login in auto-login demo mode. */
+export const getAdminUser = cache(async (): Promise<User | null> => {
+  const sessionUser = await getSessionUser();
+  if (sessionUser) return sessionUser;
+  if (!env.demoMode || !env.demoAutoLogin) return null;
+  const db = await ensureDb();
+  const [admin] = await db.select().from(users).where(eq(users.email, "admin@nuru.demo")).limit(1);
+  return admin ?? null;
 });
 
 export const getMemberships = cache(async (userId: string) => {

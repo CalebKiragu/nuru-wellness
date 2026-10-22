@@ -2,12 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ExternalLink, ShieldCheck } from "lucide-react";
 import { NuruMark } from "@/components/brand/logo";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getAdminUser } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const user = await getCurrentUser();
+  const user = await getAdminUser();
   if (!user) redirect("/login");
   if (!user.isPlatformAdmin) redirect("/dashboard");
 

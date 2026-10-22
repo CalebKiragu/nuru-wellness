@@ -40,6 +40,7 @@ Nuru Wellness is a working MVP, not a finished commercial platform. This documen
 ## Dashboard and operations
 
 - No password reset, email verification, MFA, SSO/SAML, or team invitation flow. Users are seeded; adding a teammate requires database work in this MVP.
+- `DEMO_AUTO_LOGIN` intentionally removes the authentication barrier for demonstrations: any visitor to a demo deployment acts as the workspace owner, and `/admin` acts as the platform admin. It is gated on `DEMO_MODE`, is not a production authentication strategy, and must be disabled before any real customer data is loaded.
 - Roles are owner/manager/staff plus platform admin. There are no custom roles or per-resource grants.
 - No bulk actions, CSV import/export, saved views, advanced reporting, revenue reports or analytics dashboards.
 - No file uploads or media library. Storefront images are curated files bundled in `public/media`; `STORAGE_PROVIDER`/`S3_*` are reserved but there is no adapter or upload UI.

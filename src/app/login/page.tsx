@@ -7,7 +7,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { Logo } from "@/components/brand/logo";
 import { DEMO_CREDENTIALS } from "@/db/seed";
 import { env } from "@/lib/env";
-import { getCurrentUser, getDashboardContext } from "@/lib/auth/session";
+import { getSessionUser, getDashboardContext } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LoginPage() {
-  const user = await getCurrentUser();
+  const user = await getSessionUser();
   if (user) {
     const context = await getDashboardContext();
     if (context) redirect("/dashboard");

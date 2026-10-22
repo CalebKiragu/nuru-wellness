@@ -5,6 +5,7 @@ import { ensureDb } from "@/db";
 import { dashboardNotifications } from "@/db/schema";
 import { can } from "@/lib/auth/permissions";
 import { getCurrentUser, getDashboardContext } from "@/lib/auth/session";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       navItems={navItems}
       unreadCount={Number(unread?.value ?? 0)}
       isDemo={context.tenant.isDemo}
+      autoLogin={env.demoMode && env.demoAutoLogin}
     >
       {children}
     </DashboardChrome>

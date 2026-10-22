@@ -40,11 +40,24 @@ npm run dev
 
 Open <http://localhost:3000>. With no tenant hostname the marketing landing appears; choose a demo studio from there.
 
-- Dashboard: <http://localhost:3000/login>
+- Dashboard: <http://localhost:3000/dashboard> (auto-signed in as the demo owner)
 - Amani storefront: <http://amani.localhost:3000> (or use the demo switch)
 - Bahari storefront: <http://bahari.localhost:3000>
 
 On first request the app runs migrations and, when `DEMO_MODE=true`, seeds the two demonstration tenants if the database is empty. Delete `.nuru/pgdata` to start fresh.
+
+### Demo auto-login
+
+`DEMO_MODE=true` and `DEMO_AUTO_LOGIN=true` (both defaults in `.env.example`) let the demo open the dashboard, admin and dashboard APIs without a session. The active host decides which workspace owner is used:
+
+- `amani.localhost` → `owner@amani.demo`
+- `bahari.localhost` → `owner@bahari.demo`
+- no tenant host → the demo-switched studio, or Amani by default
+- `/admin` → `admin@nuru.demo`
+
+The login page still works and still creates real database-backed sessions, so you can switch between roles if you want to demonstrate permissions. Set `DEMO_AUTO_LOGIN_EMAIL` to force a specific account.
+
+> **Demo only.** Auto-login is ignored unless `DEMO_MODE=true`. Never enable it on a deployment that holds real customer data — anyone with the URL would act as an owner. Sessions are not created in auto-login mode, so signing out simply returns the next request to the demo owner.
 
 ### Demo accounts
 
@@ -158,13 +171,15 @@ See `.env.example` for the full contract.
 | `NEXT_PUBLIC_APP_URL` | Recommended | Public base URL used in links/metadata. |
 | `ROOT_DOMAIN` | Recommended | Tenant subdomains resolve as `<slug>.<ROOT_DOMAIN>`. |
 | `DEMO_MODE` | Yes for demo | Enables demo sign-in, tenant switching, seeding and simulated external actions. |
+| `DEMO_AUTO_LOGIN` | Demo only | When `DEMO_MODE=true`, acts as the workspace owner without a session. Defaults to the demo-mode value; **never enable with real data**. |
+| `DEMO_AUTO_LOGIN_EMAIL` | No | Force a specific demo account (for example `owner@bahari.demo`) instead of the active tenant's owner. |
 | `AI_PROVIDER` | No | `mock` (default) or `openai`. |
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | If OpenAI | Live model credentials. |
 | `RESEND_API_KEY` / `EMAIL_FROM` | If live email | Real outbound email. |
 | `STORAGE_PROVIDER` and `S3_*` | No | Reserved for a future media adapter. |
 | `DATABASE_SSL=false` | No | Disable SSL for a local/private PostgreSQL. |
 
-Production safety: `SESSION_SECRET` is checked when creating a session, and production should not use the development fallback. Set `DEMO_MODE=false` to disable demo sign-in, demo switching, the demo tenant directory and seeding.
+Production safety: `SESSION_SECRET` is checked when creating a session, and production should not use the development fallback. Set `DEMO_MODE=false` to disable demo sign-in, auto-login, demo switching, the demo tenant directory and seeding.
 
 ---
 
@@ -211,6 +226,7 @@ A blueprint is included at `render.yaml`. The manual path:
    - `SESSION_SECRET` (generated)
    - `NODE_ENV=production`
    - `DEMO_MODE=true` for the demonstration deployment, `false` otherwise
+   - `DEMO_AUTO_LOGIN=true` for a no-sign-in demo (demo only)
    - `NEXT_PUBLIC_APP_URL=https://<your-service>.onrender.com`
    - `ROOT_DOMAIN=<your-service>.onrender.com` or your custom domain
    - optionally `AI_PROVIDER`, `OPENAI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`
