@@ -220,7 +220,7 @@ Playwright uses a fresh embedded database at `.nuru/e2e-pgdata` (deleted before 
 A blueprint is included at `render.yaml`. The manual path:
 
 1. Create a Render PostgreSQL instance and a Node web service from this repository.
-2. Build command: `npm ci && npm run build`; start command: `npm run start`; health check: `/api/health`.
+2. Build command: `npm ci --include=dev && npm run build`; start command: `npm run start`; health check: `/api/health`.
 3. Set:
    - `DATABASE_URL` from the Render database
    - `SESSION_SECRET` (generated)

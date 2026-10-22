@@ -14,7 +14,7 @@ This project targets Render with a Node web service and a managed PostgreSQL dat
 
 1. In Render, choose **New → Blueprint** and connect the repository.
 2. Render reads `render.yaml` and proposes:
-   - web service `nuru-wellness` — `npm ci && npm run build`, start `npm run start`, health check `/api/health`;
+   - web service `nuru-wellness` — `npm ci --include=dev && npm run build`, start `npm run start`, health check `/api/health`;
    - PostgreSQL database `nuru-db`.
 3. Apply the blueprint. `SESSION_SECRET` is generated automatically and `DATABASE_URL` is injected from the database.
 4. After the first deploy, open the service URL. The first request runs migrations and — with `DEMO_MODE=true` — seeds both studios.
@@ -33,7 +33,7 @@ Create a **PostgreSQL** instance first, then a **Web Service**:
 | Setting | Value |
 | --- | --- |
 | Runtime | Node |
-| Build command | `npm ci && npm run build` |
+| Build command | `npm ci --include=dev && npm run build` |
 | Start command | `npm run start` |
 | Health check path | `/api/health` |
 | Auto-deploy | On commit (optional) |
