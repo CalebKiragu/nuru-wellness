@@ -26,7 +26,7 @@ This project targets Render with a Node web service and a managed PostgreSQL dat
    { "status": "ok", "database": "ok", "databaseName": "nuru", "demoMode": true, "autoLogin": true, "aiProvider": "mock", "timestamp": "..." }
    ```
 
-6. Replace the placeholder `NEXT_PUBLIC_APP_URL` and `ROOT_DOMAIN` values from `render.yaml` with the real hostname Render assigned, then redeploy.
+6. Replace the placeholder `NEXT_PUBLIC_APP_URL` and `ROOT_DOMAIN` values from `render.yaml` with the real hostname Render assigned, then redeploy. If either is omitted, the app derives the public origin from `RENDER_EXTERNAL_URL` and proxy headers.
 
 ## 3. Manual deployment
 
@@ -47,8 +47,8 @@ Environment variables:
 | `DATABASE_URL` | Yes | Internal connection string from the Render database. |
 | `SESSION_SECRET` | Yes | At least 32 random bytes. Do not reuse the development fallback. |
 | `NODE_ENV` | Yes | `production`. |
-| `NEXT_PUBLIC_APP_URL` | Yes | `https://<service>.onrender.com` or custom domain. Used in metadata and links. |
-| `ROOT_DOMAIN` | Recommended | `<service>.onrender.com` or your custom root domain. |
+| `NEXT_PUBLIC_APP_URL` | Recommended | `https://<service>.onrender.com` or custom domain. Used in metadata and links. Falls back to Render's `RENDER_EXTERNAL_URL`. |
+| `ROOT_DOMAIN` | Recommended | `<service>.onrender.com` or your custom root domain. Derived from the public URL when omitted. |
 | `DEMO_MODE` | Demo only | `true` enables demo sign-in, tenant switching, the demo directory and seeding. Use `false` for a real customer deployment. |
 | `DEMO_AUTO_LOGIN` | Demo only | Requires `DEMO_MODE=true`. Acts as the workspace owner without a session so the demo needs no sign-in. **Never enable on a deployment with real data.** |
 | `DEMO_AUTO_LOGIN_EMAIL` | No | Force a specific demo account instead of the active tenant's owner. |
@@ -91,6 +91,16 @@ The storefront resolves a tenant from the request hostname (plus the demo-switch
 5. Open **Assistant**, approve the seeded campaign, and confirm the result says **simulated**.
 6. Publish a storefront change and restore version 1.
 7. Sign in as `admin@nuru.demo` and open `/admin`.
+8. Confirm the GitHub keep-alive workflow (`.github/workflows/keep-alive.yml`) is enabled on the default branch.
+
+### Keeping the free demo awake
+
+Render free web services spin down after about 15 minutes without inbound traffic. The repository includes a scheduled GitHub Actions workflow that pings `/api/health` to keep the demonstration warm.
+
+- GitHub Actions has a five-minute minimum for scheduled workflows. The workflow runs every five minutes and performs two health checks two minutes apart, giving an effective interval of roughly 2–3 minutes.
+- The workflow is deliberately time-boxed: it stops pinging after `KEEPALIVE_UNTIL` (`2026-10-27T23:59:59Z` in the current file). Delete or edit the workflow afterwards.
+- It is a demo convenience, not a production availability strategy. Use a paid Render instance or a proper uptime monitor for a real service.
+- Scheduled workflows only run from the repository default branch and can be delayed during periods of high GitHub load.
 
 ## 7. Troubleshooting
 
@@ -103,7 +113,7 @@ The storefront resolves a tenant from the request hostname (plus the demo-switch
 | Demo sign-in buttons missing | `DEMO_MODE` is not `true`, or the deployment is a non-demo environment. |
 | Emails show `simulated` | Expected without `RESEND_API_KEY`/`EMAIL_FROM`. This is deliberate and is not an error. |
 | Seed did not run | The database already contains tenants, or `DEMO_MODE=false`. Run `npm run db:seed` manually if appropriate. |
-| Free instance sleeps and first request is slow | Render free/starter instances spin down. The first request also runs migrations. Health checks can keep the service warm. |
+| Free instance sleeps and first request is slow | Render free/starter instances spin down. The first request also runs migrations. The `.github/workflows/keep-alive.yml` workflow pings the demo every five minutes (two checks per run) for a bounded demo window. |
 
 ## 8. Operational notes and caveats
 
@@ -119,3 +129,7 @@ The storefront resolves a tenant from the request hostname (plus the demo-switch
 - **Application:** use Render's deploy history to roll back to a previous image. Database migrations are forward-only; do not roll back the app across a destructive schema change without a database backup.
 - **Storefront content:** use the dashboard's version history and restore.
 - **Demo data:** recreate the database and let the seed run.
+
+### Redirects behind Render's proxy
+
+Render binds the Node process to an internal address such as `localhost:10000`; `request.url` therefore must not be used to build browser redirects. The app reconstructs the visitor-facing origin from `x-forwarded-host`, `x-forwarded-proto`, and `NEXT_PUBLIC_APP_URL` / `RENDER_EXTERNAL_URL`. This keeps demo switches, workspace switches and logout on the public hostname.

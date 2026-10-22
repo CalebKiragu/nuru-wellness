@@ -1,16 +1,36 @@
 import { NextResponse } from "next/server";
+import { env } from "@/lib/env";
 
 export function jsonError(message: string, status = 400, extras: Record<string, unknown> = {}) {
   return NextResponse.json({ error: message, ...extras }, { status });
 }
 
+function first(value: string | null): string | null {
+  return value?.split(",")[0]?.trim() || null;
+}
+
 export function assertSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return true;
+
+  // Browsers set this themselves; it is a useful backstop when a proxy
+  // rewrites Host headers. Cross-site form posts are labelled cross-site.
+  if (request.headers.get("sec-fetch-site") === "same-origin") return true;
+
   try {
-    const originHost = new URL(origin).host;
-    const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
-    return originHost === host;
+    const originHost = new URL(origin).host.toLowerCase();
+    const forwardedHost = first(request.headers.get("x-forwarded-host"))?.toLowerCase();
+    const host = first(request.headers.get("host"))?.toLowerCase();
+    if (originHost === forwardedHost || originHost === host) return true;
+
+    // A public URL can legitimately differ from the internal bind address.
+    try {
+      if (new URL(origin).origin === new URL(env.appUrl).origin) return true;
+    } catch {
+      // Ignore malformed configured URLs.
+    }
+
+    return false;
   } catch {
     return false;
   }

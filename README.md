@@ -20,6 +20,7 @@ The deployment is the free `nuru-wellness` Render web service in Oregon. It uses
 
 - Next.js 15 App Router, React 19, TypeScript
 - Tailwind CSS 4 with the Nuru design tokens
+- Motion for restrained, accessible entrance and scroll effects
 - Drizzle ORM + PostgreSQL
 - Zod validation and React Hook Form
 - Vitest for unit/integration tests
@@ -92,6 +93,7 @@ In demo mode the login page exposes one-click buttons for the owner accounts and
 
 - Mobile-first editorial design using the Forest / Sage / Ivory / Brass / Clay tokens, Cormorant Garamond display and DM Sans body type.
 - Per-tenant theme tokens and content, curated sections: hero, services, about, team, gallery, testimonials, location.
+- Premium motion layer: staggered reveals, editorial image parallax, a pointer-aware dashboard tilt, a reading-progress hairline and slow ambient/ken-burns effects. All of it respects `prefers-reduced-motion`, and reveal content stays visible without JavaScript.
 - Service detail pages with duration, price, description, therapist and add-ons.
 - Booking flow without an account: therapist, date, live server-side availability, add-ons, customer details, policy acceptance, review and confirmation.
 - Confirmation page with reference, calendar link, simulated message preview and clear demo labelling.
@@ -178,7 +180,7 @@ See `.env.example` for the full contract.
 | --- | --- | --- |
 | `DATABASE_URL` | Production | PostgreSQL connection string. Omit for local PGlite. |
 | `SESSION_SECRET` | Production | At least 32 random bytes (`openssl rand -hex 32`). |
-| `NEXT_PUBLIC_APP_URL` | Recommended | Public base URL used in links/metadata. |
+| `NEXT_PUBLIC_APP_URL` | Recommended | Public base URL used in links/metadata. Falls back to Render's `RENDER_EXTERNAL_URL`, then `http://localhost:3000`. |
 | `ROOT_DOMAIN` | Recommended | Tenant subdomains resolve as `<slug>.<ROOT_DOMAIN>`. |
 | `DEMO_MODE` | Yes for demo | Enables demo sign-in, tenant switching, seeding and simulated external actions. |
 | `DEMO_AUTO_LOGIN` | Demo only | When `DEMO_MODE=true`, acts as the workspace owner without a session. Defaults to the demo-mode value; **never enable with real data**. |
@@ -237,11 +239,13 @@ A blueprint is included at `render.yaml`. The manual path:
    - `NODE_ENV=production`
    - `DEMO_MODE=true` for the demonstration deployment, `false` otherwise
    - `DEMO_AUTO_LOGIN=true` for a no-sign-in demo (demo only)
-   - `NEXT_PUBLIC_APP_URL=https://<your-service>.onrender.com`
-   - `ROOT_DOMAIN=<your-service>.onrender.com` or your custom domain
+   - `NEXT_PUBLIC_APP_URL=https://<your-service>.onrender.com` (optional; `RENDER_EXTERNAL_URL` is used automatically)
+   - `ROOT_DOMAIN=<your-service>.onrender.com` or your custom domain (optional; derives from the public URL)
    - optionally `AI_PROVIDER`, `OPENAI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`
 4. Deploy. Migrations run on the first request; in demo mode the seed also runs when the database is empty.
 5. Verify `/api/health` returns `{ "status": "ok" }`.
+
+For the free demo deployment, `.github/workflows/keep-alive.yml` pings the public health endpoint so Render does not spin the instance down between visitors. GitHub Actions cannot schedule below a five-minute interval, so each run performs two checks two minutes apart (roughly a 2–3 minute effective cadence). The workflow is time-boxed to end on **27 October 2026**; remove or extend it afterwards. Scheduled workflows only run from the default branch and may be delayed when GitHub is busy.
 
 For branded tenant hostnames, add a wildcard custom domain (for example `*.nuru.example.com`) and set `ROOT_DOMAIN=nuru.example.com`. Render's shared `onrender.com` certificate does not cover arbitrary subdomains. Tenant domains are also stored in `tenant_domains`; hostname resolution is lookup-only and never authorizes dashboard access.
 

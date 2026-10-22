@@ -7,6 +7,16 @@ function bool(value: string | undefined, fallback: boolean) {
 
 const isProduction = process.env.NODE_ENV === "production";
 const demoMode = bool(process.env.DEMO_MODE, !isProduction);
+const externalUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.RENDER_EXTERNAL_URL;
+const appUrl = (externalUrl ?? "http://localhost:3000").replace(/\/$/, "");
+const defaultRootDomain = (() => {
+  if (process.env.ROOT_DOMAIN) return process.env.ROOT_DOMAIN;
+  try {
+    return new URL(appUrl).host;
+  } catch {
+    return "localhost:3000";
+  }
+})();
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
@@ -16,8 +26,8 @@ export const env = {
   // Only honoured while DEMO_MODE is on. Never enable this with real customer data.
   demoAutoLogin: bool(process.env.DEMO_AUTO_LOGIN, demoMode),
   demoAutoLoginEmail: process.env.DEMO_AUTO_LOGIN_EMAIL?.trim().toLowerCase() || null,
-  appUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-  rootDomain: (process.env.ROOT_DOMAIN ?? "localhost:3000").replace(/^https?:\/\//, "").replace(/\/$/, ""),
+  appUrl,
+  rootDomain: defaultRootDomain.replace(/^https?:\/\//, "").replace(/\/$/, ""),
   sessionSecret: process.env.SESSION_SECRET || "nuru-local-development-secret-do-not-use-in-production",
   databaseUrl: process.env.DATABASE_URL,
   aiProvider: process.env.AI_PROVIDER ?? "mock",

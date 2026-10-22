@@ -226,7 +226,7 @@ export function DashboardChrome({
             Demo auto-login is on — browsing as <strong className="font-semibold">{userName}</strong>. No credentials required.
           </div>
         )}
-        <main className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+        <main key={pathname} className="animate-page-in mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>
   );

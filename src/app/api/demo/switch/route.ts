@@ -4,6 +4,7 @@ import { ensureDb } from "@/db";
 import { tenantDomains, tenants } from "@/db/schema";
 import { env } from "@/lib/env";
 import { DEMO_TENANT_COOKIE } from "@/lib/tenant";
+import { publicRedirect } from "@/lib/url";
 
 export async function POST(request: Request) {
   if (!env.demoMode) return NextResponse.json({ error: "Demo switching is disabled." }, { status: 404 });
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
     .values({ tenantId: tenant.id, hostname: `${slug}.localhost`, isPrimary: false })
     .onConflictDoNothing();
 
-  const response = NextResponse.redirect(new URL(next, request.url), 303);
+  const response = publicRedirect(request, next);
   response.cookies.set(DEMO_TENANT_COOKIE, slug, {
     httpOnly: true,
     sameSite: "lax",

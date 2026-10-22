@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Clock, Instagram, MapPin, Phone } from "lucide-react";
+import { ScrollProgress } from "@/components/motion/scroll-progress";
 import type { StorefrontData } from "@/lib/tenant";
 import { env } from "@/lib/env";
 import { storefrontStyle } from "./theme";
@@ -39,11 +40,12 @@ export function StorefrontShell({
 
   return (
     <div className="sf-root min-h-screen" style={storefrontStyle(config.theme)} data-tenant={tenant.slug}>
+      <ScrollProgress color="var(--color-accent)" />
       {demo && (
         <div className="relative z-50 bg-[var(--color-brand-deep)] px-4 py-1.5 text-center text-[10px] font-medium tracking-[0.16em] text-[var(--color-on-brand)]/90 uppercase">
           <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-accent)] align-middle" />
           Demonstration storefront · bookings are saved in a demo database
-          <Link href={`${env.appUrl}/login`} className="ml-3 hidden text-[var(--color-on-brand)] underline underline-offset-2 sm:inline">
+          <Link href="/login" className="ml-3 hidden text-[var(--color-on-brand)] underline underline-offset-2 sm:inline">
             Dashboard
           </Link>
         </div>
@@ -71,7 +73,7 @@ export function StorefrontShell({
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-tenant-muted)] transition-colors hover:text-[var(--color-brand)]"
+                className="sf-nav-link text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-tenant-muted)] transition-colors hover:text-[var(--color-brand)]"
               >
                 {link.label}
               </Link>

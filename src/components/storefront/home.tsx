@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Check, Clock, MapPin, Phone, Quote, Sparkles } from "lucide-react";
+import { Parallax } from "@/components/motion/parallax";
+import { Reveal } from "@/components/motion/reveal";
 import type { StorefrontData } from "@/lib/tenant";
 import { formatDuration, formatMoney } from "@/lib/format";
 import { sortedVisibleSections, type StorefrontSection } from "@/lib/storefront";
@@ -28,46 +30,56 @@ function Hero({ data }: { data: StorefrontData }) {
     <section className="relative overflow-hidden border-b border-[var(--color-tenant-border)]">
       <div className="grid min-h-[calc(100svh-110px)] lg:grid-cols-[1.04fr_1fr]">
         <div className="relative z-10 flex flex-col justify-center px-5 py-16 sm:px-10 md:px-14 lg:px-[max(3.5rem,calc((100vw-var(--tenant-container))/2))] lg:py-24">
-          <div className="animate-fade-up">
+          <Reveal y={14} delay={0.04}>
             <p className="sf-eyebrow">{content.heroEyebrow}</p>
+          </Reveal>
+          <Reveal y={26} delay={0.1}>
             <h1 className={`${fontClass(config.theme)} mt-6 max-w-[13ch] text-[clamp(3.2rem,7.2vw,6rem)] leading-[0.92] tracking-[-0.025em] text-[var(--color-tenant-ink)]`}>
               {content.heroTitle}
             </h1>
+          </Reveal>
+          <Reveal y={20} delay={0.18}>
             <p className="mt-7 max-w-[34rem] text-[0.98rem] leading-[1.75] text-[var(--color-tenant-muted)] sm:text-[1.05rem]">
               {content.heroText}
             </p>
+          </Reveal>
+          <Reveal y={18} delay={0.24}>
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Link href="/book" className="sf-btn sf-btn-primary">
+              <Link href="/book" className="sf-btn btn-sheen sf-btn-primary">
                 {content.primaryCta} <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <Link href="/#services" className="sf-btn sf-btn-outline">
                 {content.secondaryCta}
               </Link>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-[var(--color-tenant-border)] pt-5 text-[11px] uppercase tracking-[0.13em] text-[var(--color-tenant-muted)]">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-[var(--color-accent)]" aria-hidden="true" /> {content.city}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-[var(--color-accent)]" aria-hidden="true" /> {todayLabel(data.hours)}
-            </span>
-            {priceFrom > 0 && <span>From {formatMoney(priceFrom, data.tenant.currency)}</span>}
-          </div>
+          <Reveal y={12} delay={0.3}>
+            <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-[var(--color-tenant-border)] pt-5 text-[11px] uppercase tracking-[0.13em] text-[var(--color-tenant-muted)]">
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-[var(--color-accent)]" aria-hidden="true" /> {content.city}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-[var(--color-accent)]" aria-hidden="true" /> {todayLabel(data.hours)}
+              </span>
+              {priceFrom > 0 && <span>From {formatMoney(priceFrom, data.tenant.currency)}</span>}
+            </div>
+          </Reveal>
         </div>
 
         <div className="relative min-h-[58vh] overflow-hidden lg:min-h-full">
-          <Image
-            src={content.heroImage}
-            alt={content.heroImageAlt}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
-            style={{ objectPosition: content.heroFocal || "center" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1c2b24]/35 via-transparent to-transparent" />
+          <Parallax className="absolute inset-[-4%]" distance={18} zoom>
+            <Image
+              src={content.heroImage}
+              alt={content.heroImageAlt}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="animate-ken-burns object-cover"
+              style={{ objectPosition: content.heroFocal || "center" }}
+            />
+          </Parallax>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1c2b24]/40 via-transparent to-transparent" />
           <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 text-white sm:bottom-9 sm:left-9 sm:right-9">
             <div className="rounded-[var(--tenant-radius)] border border-white/20 bg-black/20 px-4 py-3 backdrop-blur-md">
               <p className="text-[9px] uppercase tracking-[0.2em] text-white/70">The studio</p>
@@ -90,24 +102,26 @@ function Services({ data }: { data: StorefrontData }) {
   return (
     <section id="services" className="sf-section">
       <div className="sf-container">
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="sf-eyebrow">{config.content.servicesEyebrow}</p>
-            <h2 className={`${fontClass(config.theme)} mt-4 max-w-[15ch] text-[clamp(2.5rem,4.6vw,4rem)] leading-[0.98]`}>
-              {config.content.servicesTitle}
-            </h2>
+        <Reveal>
+          <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="sf-eyebrow">{config.content.servicesEyebrow}</p>
+              <h2 className={`${fontClass(config.theme)} mt-4 max-w-[15ch] text-[clamp(2.5rem,4.6vw,4rem)] leading-[0.98]`}>
+                {config.content.servicesTitle}
+              </h2>
+            </div>
+            <p className="max-w-sm text-sm leading-relaxed text-[var(--color-tenant-muted)]">
+              {config.content.servicesText}
+            </p>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-[var(--color-tenant-muted)]">
-            {config.content.servicesText}
-          </p>
-        </div>
+        </Reveal>
 
         <div className="mt-12 border-t border-[var(--color-tenant-border)]">
           {services.map((service, index) => (
+            <Reveal key={service.id} delay={Math.min(index * 0.05, 0.3)} y={16}>
             <Link
-              key={service.id}
               href={`/services/${service.slug}`}
-              className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 border-b border-[var(--color-tenant-border)] py-6 transition-colors hover:bg-[color-mix(in_srgb,var(--color-soft)_48%,transparent)] sm:gap-7 sm:px-3 md:grid-cols-[2.5rem_6rem_1fr_auto]"
+              className="service-row group grid grid-cols-[auto_1fr_auto] items-center gap-4 border-b border-[var(--color-tenant-border)] py-6 transition-colors hover:bg-[color-mix(in_srgb,var(--color-soft)_48%,transparent)] sm:gap-7 sm:px-3 md:grid-cols-[2.5rem_6rem_1fr_auto]"
             >
               <span className="hidden text-[10px] font-medium tracking-[0.15em] text-[var(--color-accent)] md:block">
                 {String(index + 1).padStart(2, "0")}
@@ -141,9 +155,11 @@ function Services({ data }: { data: StorefrontData }) {
                 <ArrowUpRight className="h-5 w-5 text-[var(--color-brand)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
               </div>
             </Link>
+            </Reveal>
           ))}
         </div>
 
+        <Reveal delay={0.1}>
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
           <p className="inline-flex items-center gap-2 text-xs text-[var(--color-tenant-muted)]">
             <Sparkles className="h-3.5 w-3.5 text-[var(--color-accent)]" aria-hidden="true" />
@@ -153,6 +169,7 @@ function Services({ data }: { data: StorefrontData }) {
             View availability
           </Link>
         </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -164,8 +181,9 @@ function About({ data }: { data: StorefrontData }) {
   return (
     <section id="about" className="sf-section border-y border-[var(--color-tenant-border)] bg-[color-mix(in_srgb,var(--color-soft)_35%,var(--color-canvas))]">
       <div className="sf-container grid gap-12 lg:grid-cols-[1.02fr_1fr] lg:items-center lg:gap-20">
+        <Reveal y={28}>
         <div className="relative">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--tenant-radius)]">
+          <div className="hover-zoom relative aspect-[4/5] overflow-hidden rounded-[var(--tenant-radius)]">
             <Image
               src={config.content.aboutImage}
               alt={config.content.aboutImageAlt}
@@ -174,7 +192,7 @@ function About({ data }: { data: StorefrontData }) {
               className="object-cover"
             />
           </div>
-          <div className="absolute -bottom-4 -right-2 hidden w-[12rem] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-soft)] sm:block lg:-right-8">
+          <div className="absolute -bottom-4 -right-2 hidden w-[12rem] animate-float-slow bg-[var(--color-surface)] p-5 shadow-[var(--shadow-soft)] sm:block lg:-right-8">
             <p className="font-display text-3xl text-[var(--color-brand)]">
               {staff.length} <span className="text-lg">therapists</span>
             </p>
@@ -183,7 +201,9 @@ function About({ data }: { data: StorefrontData }) {
             </p>
           </div>
         </div>
+        </Reveal>
 
+        <Reveal delay={0.1} y={24}>
         <div>
           <p className="sf-eyebrow">Our approach</p>
           <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
@@ -202,6 +222,7 @@ function About({ data }: { data: StorefrontData }) {
             Plan your visit
           </Link>
         </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -212,18 +233,21 @@ function Team({ data }: { data: StorefrontData }) {
   return (
     <section id="team" className="sf-section">
       <div className="sf-container">
-        <div className="max-w-2xl">
-          <p className="sf-eyebrow">The people</p>
-          <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
-            {config.content.teamTitle}
-          </h2>
-          <p className="mt-5 text-sm leading-relaxed text-[var(--color-tenant-muted)]">{config.content.teamText}</p>
-        </div>
+        <Reveal>
+          <div className="max-w-2xl">
+            <p className="sf-eyebrow">The people</p>
+            <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
+              {config.content.teamTitle}
+            </h2>
+            <p className="mt-5 text-sm leading-relaxed text-[var(--color-tenant-muted)]">{config.content.teamText}</p>
+          </div>
+        </Reveal>
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:gap-12">
           {staff.map((person, index) => (
-            <article key={person.id} className={index % 2 === 1 ? "sm:mt-16" : ""}>
-              <div className="relative aspect-[5/6] overflow-hidden rounded-[var(--tenant-radius)] bg-[var(--color-soft)]">
+            <Reveal key={person.id} delay={index * 0.08} y={26} className={index % 2 === 1 ? "sm:mt-16" : ""}>
+            <article>
+              <div className="hover-zoom relative aspect-[5/6] overflow-hidden rounded-[var(--tenant-radius)] bg-[var(--color-soft)]">
                 {person.imageUrl ? (
                   <Image
                     src={person.imageUrl}
@@ -246,6 +270,7 @@ function Team({ data }: { data: StorefrontData }) {
               </div>
               <p className="mt-3 text-sm leading-relaxed text-[var(--color-tenant-muted)]">{person.bio}</p>
             </article>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -267,29 +292,36 @@ function Gallery({ data }: { data: StorefrontData }) {
   return (
     <section id="gallery" className="sf-section border-y border-[var(--color-tenant-border)] bg-[var(--color-surface)]">
       <div className="sf-container">
-        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-          <div>
-            <p className="sf-eyebrow">The space</p>
-            <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
-              {config.content.galleryTitle}
-            </h2>
+        <Reveal>
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div>
+              <p className="sf-eyebrow">The space</p>
+              <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
+                {config.content.galleryTitle}
+              </h2>
+            </div>
+            <p className="max-w-sm text-xs leading-relaxed text-[var(--color-tenant-muted)]">{config.content.galleryText}</p>
           </div>
-          <p className="max-w-sm text-xs leading-relaxed text-[var(--color-tenant-muted)]">{config.content.galleryText}</p>
-        </div>
+        </Reveal>
         <div className="mt-10 grid gap-3 md:grid-cols-12 md:grid-rows-2">
           {images.slice(0, 6).map((image, index) => (
-            <div
+            <Reveal
               key={`${image.url}-${index}`}
-              className={`sf-image-zoom relative min-h-[15rem] overflow-hidden rounded-[var(--tenant-radius)] bg-[var(--color-soft)] md:min-h-[13rem] ${layout[index] ?? "md:col-span-4"}`}
+              delay={index * 0.045}
+              y={20}
+              className={`relative min-h-[15rem] ${layout[index] ?? "md:col-span-4"}`}
             >
-              <Image
-                src={image.url}
-                alt={image.alt}
-                fill
-                sizes={index === 0 ? "(max-width: 768px) 100vw, 58vw" : "(max-width: 768px) 100vw, 33vw"}
-                className="object-cover"
-              />
-            </div>
+              <div className="sf-image-zoom group relative h-full min-h-[15rem] overflow-hidden rounded-[var(--tenant-radius)] bg-[var(--color-soft)] md:min-h-[13rem]">
+                <Image
+                  src={image.url}
+                  alt={image.alt}
+                  fill
+                  sizes={index === 0 ? "(max-width: 768px) 100vw, 58vw" : "(max-width: 768px) 100vw, 33vw"}
+                  className="object-cover"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#18251f]/15 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              </div>
+            </Reveal>
           ))}
         </div>
         <p className="mt-4 text-[10px] uppercase tracking-[0.14em] text-[var(--color-tenant-muted)]">
@@ -305,24 +337,24 @@ function Testimonials({ data }: { data: StorefrontData }) {
   return (
     <section id="testimonials" className="sf-section bg-[var(--color-soft)]">
       <div className="sf-container">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="sf-eyebrow">Kind words</p>
-            <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
-              {config.content.testimonialsTitle}
-            </h2>
+        <Reveal>
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <p className="sf-eyebrow">Kind words</p>
+              <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
+                {config.content.testimonialsTitle}
+              </h2>
+            </div>
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--color-tenant-border)] bg-[var(--color-canvas)]/60 px-3 py-1.5 text-[9px] uppercase tracking-[0.14em] text-[var(--color-tenant-muted)]">
+              Illustrative · not verified reviews
+            </span>
           </div>
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--color-tenant-border)] bg-[var(--color-canvas)]/60 px-3 py-1.5 text-[9px] uppercase tracking-[0.14em] text-[var(--color-tenant-muted)]">
-            Illustrative · not verified reviews
-          </span>
-        </div>
+        </Reveal>
 
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {config.content.testimonials.map((testimonial, index) => (
-            <figure
-              key={testimonial.author}
-              className={`flex flex-col justify-between rounded-[var(--tenant-radius)] border border-[var(--color-tenant-border)] bg-[var(--color-canvas)] p-6 sm:p-7 ${index === 0 ? "md:-translate-y-3" : ""}`}
-            >
+            <Reveal key={testimonial.author} delay={index * 0.08} y={20} className={index === 0 ? "md:-translate-y-3" : ""}>
+            <figure className="card-lift flex h-full flex-col justify-between rounded-[var(--tenant-radius)] border border-[var(--color-tenant-border)] bg-[var(--color-canvas)] p-6 sm:p-7">
               <Quote className="h-6 w-6 text-[var(--color-accent)]/60" aria-hidden="true" />
               <blockquote className={`${fontClass(config.theme)} mt-5 text-[1.35rem] leading-[1.35] text-[var(--color-tenant-ink)]`}>
                 “{testimonial.quote}”
@@ -331,6 +363,7 @@ function Testimonials({ data }: { data: StorefrontData }) {
                 {testimonial.author} · {testimonial.service}
               </figcaption>
             </figure>
+            </Reveal>
           ))}
         </div>
         <p className="mt-5 max-w-2xl text-[10px] leading-relaxed text-[var(--color-tenant-muted)]">{config.content.testimonialsText}</p>
@@ -345,6 +378,7 @@ function Location({ data }: { data: StorefrontData }) {
   return (
     <section id="visit" className="sf-section">
       <div className="sf-container grid gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-stretch">
+        <Reveal>
         <div>
           <p className="sf-eyebrow">Visit</p>
           <h2 className={`${fontClass(config.theme)} mt-4 text-[clamp(2.4rem,4.4vw,3.75rem)] leading-[0.98]`}>
@@ -391,9 +425,13 @@ function Location({ data }: { data: StorefrontData }) {
             </a>
           </div>
         </div>
+        </Reveal>
 
-        <div className="relative min-h-[25rem] overflow-hidden rounded-[var(--tenant-radius)]">
-          <Image src={image} alt="The studio space" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+        <Reveal delay={0.1} y={26}>
+        <div className="grain-overlay relative min-h-[25rem] overflow-hidden rounded-[var(--tenant-radius)]">
+          <Parallax className="absolute inset-[-4%]" distance={22} zoom>
+            <Image src={image} alt="The studio space" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+          </Parallax>
           <div className="absolute inset-0 bg-gradient-to-t from-[#18251f]/55 via-transparent to-transparent" />
           <div className="absolute bottom-5 left-5 right-5 rounded-[var(--tenant-radius)] border border-white/20 bg-[#1b2a23]/55 p-5 text-white backdrop-blur-md">
             <div className="flex items-start gap-3">
@@ -407,6 +445,7 @@ function Location({ data }: { data: StorefrontData }) {
             </div>
           </div>
         </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -414,22 +453,27 @@ function Location({ data }: { data: StorefrontData }) {
 
 function ClosingCta({ data }: { data: StorefrontData }) {
   return (
-    <section className="relative overflow-hidden bg-[var(--color-brand)] py-20 text-[var(--color-on-brand)] sm:py-24">
-      <div className="pointer-events-none absolute -right-24 -top-32 h-96 w-96 rounded-full border border-white/10" />
-      <div className="pointer-events-none absolute -bottom-40 -left-20 h-80 w-80 rounded-full border border-white/10" />
+    <section className="grain-overlay relative overflow-hidden bg-[var(--color-brand)] py-20 text-[var(--color-on-brand)] sm:py-24">
+      <div className="pointer-events-none absolute -right-24 -top-32 h-96 w-96 animate-pulse-soft rounded-full border border-white/10" />
+      <div className="pointer-events-none absolute -bottom-40 -left-20 h-80 w-80 animate-pulse-soft rounded-full border border-white/10" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 animate-drift rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08),transparent_62%)] blur-2xl" />
       <div className="sf-container relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.22em] text-white/55">Your time</p>
-          <h2 className={`${fontClass(data.config.theme)} mt-4 max-w-[18ch] text-[clamp(2.6rem,5vw,4.5rem)] leading-[0.96]`}>
-            An hour that belongs entirely to you.
-          </h2>
-        </div>
-        <div className="flex flex-col items-start gap-3 md:items-end">
-          <Link href="/book" className="sf-btn sf-btn-light">
-            Book a treatment <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-          <p className="text-[10px] uppercase tracking-[0.15em] text-white/55">Online booking · instant confirmation</p>
-        </div>
+        <Reveal>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/55">Your time</p>
+            <h2 className={`${fontClass(data.config.theme)} mt-4 max-w-[18ch] text-[clamp(2.6rem,5vw,4.5rem)] leading-[0.96]`}>
+              An hour that belongs entirely to you.
+            </h2>
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="flex flex-col items-start gap-3 md:items-end">
+            <Link href="/book" className="sf-btn btn-sheen sf-btn-light">
+              Book a treatment <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-white/55">Online booking · instant confirmation</p>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

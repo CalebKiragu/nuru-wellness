@@ -13,19 +13,30 @@ import {
   Store,
 } from "lucide-react";
 import { Logo, NuruMark } from "@/components/brand/logo";
+import { Reveal } from "@/components/motion/reveal";
+import { ScrollProgress } from "@/components/motion/scroll-progress";
+import { Tilt } from "@/components/motion/tilt";
 import { listPublicTenantsForDemo } from "@/lib/tenant";
-import { env } from "@/lib/env";
 
 const tenantImagery: Record<string, { image: string; theme: string }> = {
   amani: { image: "/media/amani/hero.jpg", theme: "Botanical Luxury" },
   bahari: { image: "/media/bahari/hero.jpg", theme: "Coastal Calm" },
 };
 
+const capabilities = [
+  { label: "Branded storefront", icon: Store },
+  { label: "Live booking", icon: CalendarDays },
+  { label: "Business dashboard", icon: LayoutDashboard },
+  { label: "AI operations", icon: Sparkles },
+  { label: "Tenant isolation", icon: LockKeyhole },
+];
+
 export async function PlatformLanding() {
   const demoTenants = await listPublicTenantsForDemo();
 
   return (
     <div className="min-h-screen bg-ivory text-ink">
+      <ScrollProgress />
       <header className="sticky top-0 z-40 border-b border-line/80 bg-ivory/90 backdrop-blur-md">
         <div className="mx-auto flex h-[76px] max-w-[86rem] items-center justify-between px-5 md:px-10">
           <Logo />
@@ -36,44 +47,59 @@ export async function PlatformLanding() {
             <Link href="/login" className="text-xs font-semibold uppercase tracking-[0.12em] text-muted transition-colors hover:text-forest">Sign in</Link>
           </nav>
           <div className="flex items-center gap-2">
-            <Link href="/login" className="dash-btn dash-btn-secondary hidden sm:inline-flex">Open dashboard</Link>
-            <a href="#studios" className="dash-btn dash-btn-primary">Explore the demo</a>
+            <span className="hidden sm:block">
+              <Link href="/login" className="dash-btn dash-btn-secondary">Open dashboard</Link>
+            </span>
+            <a href="#studios" className="dash-btn btn-sheen dash-btn-primary">Explore the demo</a>
           </div>
         </div>
       </header>
 
       <main>
-        <section className="relative overflow-hidden border-b border-line">
+        <section className="nuru-grain relative overflow-hidden border-b border-line">
           <div className="pointer-events-none absolute -right-40 -top-48 h-[38rem] w-[38rem] rounded-full border border-forest/10" />
           <div className="pointer-events-none absolute -right-24 -top-32 h-[26rem] w-[26rem] rounded-full border border-forest/10" />
+          <div className="pointer-events-none absolute -left-40 bottom-0 h-[32rem] w-[32rem] animate-drift rounded-full bg-[radial-gradient(circle,rgba(198,167,122,0.22),transparent_68%)] blur-2xl" />
+          <div className="pointer-events-none absolute right-1/4 top-10 h-48 w-48 animate-pulse-soft rounded-full bg-[radial-gradient(circle,rgba(169,183,160,0.3),transparent_70%)] blur-2xl" />
           <div className="mx-auto grid max-w-[86rem] gap-14 px-5 py-16 md:px-10 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-24">
             <div className="relative z-10">
-              <p className="inline-flex items-center gap-2 rounded-full border border-brass/40 bg-white/60 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-forest">
-                <NuruMark size={16} /> White-label wellness platform
-              </p>
-              <h1 className="mt-7 max-w-[12ch] font-display text-[clamp(3.6rem,7.5vw,6.6rem)] leading-[0.9] tracking-[-0.03em] text-forest">
-                A beautiful home for your practice.
-              </h1>
-              <p className="mt-7 max-w-xl text-[1.05rem] leading-[1.8] text-muted">
-                Nuru brings a considered storefront, effortless online booking, a calm business
-                dashboard and an AI assistant that helps you run the studio — all under your own brand.
-              </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <a href="#studios" className="dash-btn dash-btn-primary min-h-12 px-6">
-                  Explore two demo studios <ArrowRight className="h-4 w-4" />
-                </a>
-                <Link href="/login" className="dash-btn dash-btn-secondary min-h-12 px-6">
-                  Sign in to the dashboard
-                </Link>
-              </div>
-              <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 border-t border-line pt-6 text-[11px] uppercase tracking-[0.13em] text-muted">
-                <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-brass" /> Your brand</span>
-                <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-brass" /> Real bookings</span>
-                <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-brass" /> Human approval</span>
-              </div>
+              <Reveal y={16} delay={0.02}>
+                <p className="inline-flex items-center gap-2 rounded-full border border-brass/40 bg-white/60 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-forest shadow-[0_10px_30px_-24px_rgba(36,72,61,0.7)] backdrop-blur-sm">
+                  <NuruMark size={16} /> White-label wellness platform
+                </p>
+              </Reveal>
+              <Reveal y={28} delay={0.08}>
+                <h1 className="mt-7 max-w-[12ch] font-display text-[clamp(3.6rem,7.5vw,6.6rem)] leading-[0.9] tracking-[-0.03em] text-forest">
+                  A beautiful home for your practice.
+                </h1>
+              </Reveal>
+              <Reveal y={22} delay={0.16}>
+                <p className="mt-7 max-w-xl text-[1.05rem] leading-[1.8] text-muted">
+                  Nuru brings a considered storefront, effortless online booking, a calm business
+                  dashboard and an AI assistant that helps you run the studio — all under your own brand.
+                </p>
+              </Reveal>
+              <Reveal y={18} delay={0.24}>
+                <div className="mt-9 flex flex-wrap gap-3">
+                  <a href="#studios" className="dash-btn btn-sheen dash-btn-primary min-h-12 px-6">
+                    Explore two demo studios <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <Link href="/login" className="dash-btn dash-btn-secondary min-h-12 px-6">
+                    Sign in to the dashboard
+                  </Link>
+                </div>
+              </Reveal>
+              <Reveal y={14} delay={0.3}>
+                <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 border-t border-line pt-6 text-[11px] uppercase tracking-[0.13em] text-muted">
+                  <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-brass" /> Your brand</span>
+                  <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-brass" /> Real bookings</span>
+                  <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-brass" /> Human approval</span>
+                </div>
+              </Reveal>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[34rem] lg:max-w-none">
+            <Reveal y={34} delay={0.18} className="relative mx-auto w-full max-w-[34rem] lg:max-w-none">
+              <Tilt className="relative">
               <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-sage/40 via-transparent to-brass/20 blur-2xl" />
               <div className="relative rotate-[0.6deg] rounded-[1.2rem] border border-white/60 bg-paper p-3 shadow-[0_50px_100px_-50px_rgba(36,72,61,0.55)]">
                 <div className="flex items-center justify-between rounded-t-[0.8rem] border border-line bg-[#fbf8f2] px-4 py-2.5">
@@ -162,32 +188,41 @@ export async function PlatformLanding() {
                   <span className="rounded border border-line px-2 py-1 text-[7px] text-muted">Not sent</span>
                 </div>
               </div>
-            </div>
+              </Tilt>
+            </Reveal>
           </div>
         </section>
 
-        <div className="border-b border-line bg-white/45">
-          <div className="mx-auto flex max-w-[86rem] flex-wrap items-center justify-between gap-4 px-5 py-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted md:px-10">
-            <span>One calm platform</span>
-            <span className="flex items-center gap-1.5"><Store className="h-3.5 w-3.5 text-brass" /> Branded storefront</span>
-            <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5 text-brass" /> Live booking</span>
-            <span className="flex items-center gap-1.5"><LayoutDashboard className="h-3.5 w-3.5 text-brass" /> Business dashboard</span>
-            <span className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5 text-brass" /> AI operations</span>
-            <span className="flex items-center gap-1.5"><LockKeyhole className="h-3.5 w-3.5 text-brass" /> Tenant isolation</span>
+        <div className="overflow-hidden border-b border-line bg-white/45 py-4">
+          <div className="ticker-mask">
+            <div className="flex w-max animate-marquee items-center gap-10 pr-10 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted hover:[animation-play-state:paused]">
+              {[0, 1].map((half) => (
+                <div key={half} className="flex shrink-0 items-center gap-10" aria-hidden={half === 1 ? true : undefined}>
+                  <span className="shrink-0 text-forest/65">One calm platform</span>
+                  {capabilities.map((item) => (
+                    <span key={item.label} className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+                      <item.icon className="h-3.5 w-3.5 text-brass" aria-hidden="true" /> {item.label}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         <section id="product" className="mx-auto max-w-[86rem] px-5 py-20 md:px-10 md:py-28">
-          <div className="max-w-2xl">
-            <p className="sf-eyebrow">Beyond a booking page</p>
-            <h2 className="mt-4 font-display text-[clamp(2.6rem,5vw,4.4rem)] leading-[0.95] text-forest">
-              Three products, one considered experience.
-            </h2>
-            <p className="mt-5 text-[0.98rem] leading-relaxed text-muted">
-              Everything a therapist needs to look established, stay organised and spend more time
-              with clients — without stitching together five disconnected tools.
-            </p>
-          </div>
+          <Reveal>
+            <div className="max-w-2xl">
+              <p className="sf-eyebrow">Beyond a booking page</p>
+              <h2 className="mt-4 font-display text-[clamp(2.6rem,5vw,4.4rem)] leading-[0.95] text-forest">
+                Three products, one considered experience.
+              </h2>
+              <p className="mt-5 text-[0.98rem] leading-relaxed text-muted">
+                Everything a therapist needs to look established, stay organised and spend more time
+                with clients — without stitching together five disconnected tools.
+              </p>
+            </div>
+          </Reveal>
 
           <div className="mt-14 grid gap-5 lg:grid-cols-3">
             {[
@@ -215,82 +250,88 @@ export async function PlatformLanding() {
                 points: ["Observable tool calls", "Approval-bound actions", "Honest demo/live labels"],
                 image: "/media/amani/detail.jpg",
               },
-            ].map((feature) => (
-              <article key={feature.number} className="group overflow-hidden rounded-2xl border border-line bg-paper">
-                <div className="relative h-44 overflow-hidden">
-                  <Image src={feature.image} alt="" fill sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1b2a23]/55 to-transparent" />
-                  <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/20 text-white backdrop-blur-sm">
-                    <feature.icon className="h-4 w-4" />
-                  </span>
-                  <span className="absolute bottom-3 right-4 font-display text-2xl text-white/70">{feature.number}</span>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-display text-[1.8rem] leading-tight text-forest">{feature.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted">{feature.body}</p>
-                  <ul className="mt-5 space-y-2 border-t border-line pt-4">
-                    {feature.points.map((point) => (
-                      <li key={point} className="flex items-center gap-2 text-xs text-ink">
-                        <Check className="h-3.5 w-3.5 text-brass" /> {point}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </article>
+            ].map((feature, index) => (
+              <Reveal key={feature.number} delay={index * 0.08} y={28} className="h-full">
+                <article className="group card-lift hover-zoom h-full overflow-hidden rounded-2xl border border-line bg-paper">
+                  <div className="relative h-44 overflow-hidden">
+                    <Image src={feature.image} alt="" fill sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1b2a23]/55 to-transparent" />
+                    <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/20 text-white backdrop-blur-sm transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
+                      <feature.icon className="h-4 w-4" />
+                    </span>
+                    <span className="absolute bottom-3 right-4 font-display text-2xl text-white/70">{feature.number}</span>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-display text-[1.8rem] leading-tight text-forest">{feature.title}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-muted">{feature.body}</p>
+                    <ul className="mt-5 space-y-2 border-t border-line pt-4">
+                      {feature.points.map((point) => (
+                        <li key={point} className="flex items-center gap-2 text-xs text-ink">
+                          <Check className="h-3.5 w-3.5 text-brass" /> {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              </Reveal>
             ))}
           </div>
         </section>
 
         <section id="studios" className="border-y border-line bg-[#efe9de] py-20 md:py-28">
           <div className="mx-auto max-w-[86rem] px-5 md:px-10">
-            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-              <div className="max-w-2xl">
-                <p className="sf-eyebrow">See it with real data</p>
-                <h2 className="mt-4 font-display text-[clamp(2.6rem,5vw,4.4rem)] leading-[0.95] text-forest">
-                  Two studios. Two identities. Complete isolation.
-                </h2>
-                <p className="mt-5 text-[0.98rem] leading-relaxed text-muted">
-                  Each demonstration studio has its own brand, services, team, bookings and AI
-                  workspace. Switch between them to see how Nuru keeps tenants separate.
+            <Reveal>
+              <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+                <div className="max-w-2xl">
+                  <p className="sf-eyebrow">See it with real data</p>
+                  <h2 className="mt-4 font-display text-[clamp(2.6rem,5vw,4.4rem)] leading-[0.95] text-forest">
+                    Two studios. Two identities. Complete isolation.
+                  </h2>
+                  <p className="mt-5 text-[0.98rem] leading-relaxed text-muted">
+                    Each demonstration studio has its own brand, services, team, bookings and AI
+                    workspace. Switch between them to see how Nuru keeps tenants separate.
+                  </p>
+                </div>
+                <p className="inline-flex items-center gap-2 rounded-full border border-line bg-ivory px-4 py-2 text-[10px] uppercase tracking-[0.14em] text-muted">
+                  <span className="h-1.5 w-1.5 rounded-full bg-clay" /> Demonstration data
                 </p>
               </div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-line bg-ivory px-4 py-2 text-[10px] uppercase tracking-[0.14em] text-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-clay" /> Demonstration data
-              </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12 grid gap-6 lg:grid-cols-2">
-              {demoTenants.map((tenant) => {
+              {demoTenants.map((tenant, index) => {
                 const meta = tenantImagery[tenant.slug];
                 return (
-                  <article key={tenant.slug} className="group relative overflow-hidden rounded-2xl">
-                    <div className="relative aspect-[16/10] overflow-hidden">
-                      <Image
-                        src={meta?.image ?? "/media/amani/hero.jpg"}
-                        alt={`${tenant.name} demonstration storefront`}
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="object-cover transition-transform duration-[900ms] group-hover:scale-[1.03]"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#14211b]/85 via-[#14211b]/25 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 p-6 text-ivory sm:p-8">
-                        <p className="text-[9px] uppercase tracking-[0.2em] text-white/60">{meta?.theme ?? "Demo studio"} · {tenant.slug === "bahari" ? "Mombasa" : "Nairobi"}</p>
-                        <h3 className="mt-2 font-display text-4xl">{tenant.name}</h3>
-                        <div className="mt-5 flex flex-wrap items-center gap-3">
-                          <form action="/api/demo/switch" method="post">
-                            <input type="hidden" name="tenant" value={tenant.slug} />
-                            <input type="hidden" name="next" value="/" />
-                            <button type="submit" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-ivory px-5 text-[10px] font-semibold uppercase tracking-[0.12em] text-forest transition-colors hover:bg-white">
-                              View storefront <ArrowUpRight className="h-3.5 w-3.5" />
-                            </button>
-                          </form>
-                          <Link href="/login" className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-white/25 px-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/90 transition-colors hover:bg-white/10">
-                            Owner dashboard <ChevronRight className="h-3.5 w-3.5" />
-                          </Link>
+                  <Reveal key={tenant.slug} delay={index * 0.1} y={30}>
+                    <article className="group card-lift hover-zoom relative overflow-hidden rounded-2xl bg-forest">
+                      <div className="relative aspect-[16/10] overflow-hidden">
+                        <Image
+                          src={meta?.image ?? "/media/amani/hero.jpg"}
+                          alt={`${tenant.name} demonstration storefront`}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                          className="object-cover transition-transform duration-[900ms] group-hover:scale-[1.04]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#14211b]/90 via-[#14211b]/30 to-transparent transition-opacity duration-700 group-hover:opacity-95" />
+                        <div className="absolute inset-x-0 bottom-0 p-6 text-ivory sm:p-8">
+                          <p className="text-[9px] uppercase tracking-[0.2em] text-white/60">{meta?.theme ?? "Demo studio"} · {tenant.slug === "bahari" ? "Mombasa" : "Nairobi"}</p>
+                          <h3 className="mt-2 font-display text-4xl">{tenant.name}</h3>
+                          <div className="mt-5 flex flex-wrap items-center gap-3">
+                            <form action="/api/demo/switch" method="post">
+                              <input type="hidden" name="tenant" value={tenant.slug} />
+                              <input type="hidden" name="next" value="/" />
+                              <button type="submit" className="btn-sheen inline-flex min-h-11 items-center gap-2 rounded-md bg-ivory px-5 text-[10px] font-semibold uppercase tracking-[0.12em] text-forest transition-colors hover:bg-white">
+                                View storefront <ArrowUpRight className="h-3.5 w-3.5" />
+                              </button>
+                            </form>
+                            <Link href="/login" className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-white/25 px-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/90 transition-colors hover:bg-white/10">
+                              Owner dashboard <ChevronRight className="h-3.5 w-3.5" />
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </article>
+                    </article>
+                  </Reveal>
                 );
               })}
             </div>
@@ -302,6 +343,7 @@ export async function PlatformLanding() {
 
         <section id="ai" className="mx-auto max-w-[86rem] px-5 py-20 md:px-10 md:py-28">
           <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <Reveal>
             <div>
               <p className="sf-eyebrow">Quietly intelligent</p>
               <h2 className="mt-4 font-display text-[clamp(2.6rem,5vw,4.4rem)] leading-[0.95] text-forest">
@@ -329,8 +371,11 @@ export async function PlatformLanding() {
                 ))}
               </div>
             </div>
+            </Reveal>
 
-            <div className="rounded-2xl border border-line bg-paper p-4 shadow-[0_30px_80px_-55px_rgba(36,72,61,0.5)] sm:p-6">
+            <Reveal delay={0.12} y={28} className="relative">
+              <div className="pointer-events-none absolute -inset-4 animate-pulse-soft rounded-[2rem] bg-[radial-gradient(circle_at_70%_20%,rgba(198,167,122,0.2),transparent_62%)] blur-xl" />
+            <div className="card-lift relative rounded-2xl border border-line bg-paper p-4 shadow-[0_30px_80px_-55px_rgba(36,72,61,0.5)] sm:p-6">
               <div className="flex items-center justify-between border-b border-line pb-4">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-forest text-ivory"><MessageSquareText className="h-4 w-4" /></span>
@@ -370,25 +415,32 @@ export async function PlatformLanding() {
                 </div>
               </div>
             </div>
+            </Reveal>
           </div>
         </section>
 
-        <section className="border-y border-line bg-forest py-16 text-ivory md:py-20">
-          <div className="mx-auto flex max-w-[86rem] flex-col items-start justify-between gap-8 px-5 md:flex-row md:items-center md:px-10">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-brass">The first walkthrough</p>
-              <h2 className="mt-3 max-w-[22ch] font-display text-[clamp(2.4rem,4.5vw,3.8rem)] leading-[0.98]">
-                Spend less time managing. More time caring.
-              </h2>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <a href="#studios" className="inline-flex min-h-12 items-center gap-2 rounded-md bg-ivory px-6 text-[10px] font-semibold uppercase tracking-[0.12em] text-forest transition-colors hover:bg-white">
-                Open a demo storefront <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-              <Link href="/login" className="inline-flex min-h-12 items-center gap-2 rounded-md border border-ivory/25 px-6 text-[10px] font-semibold uppercase tracking-[0.12em] text-ivory transition-colors hover:bg-white/10">
-                Dashboard sign in
-              </Link>
-            </div>
+        <section className="grain-overlay relative overflow-hidden border-y border-line bg-forest py-16 text-ivory md:py-20">
+          <div className="pointer-events-none absolute -right-24 -top-32 h-96 w-96 animate-pulse-soft ambient-ring" />
+          <div className="pointer-events-none absolute -bottom-40 left-1/4 h-80 w-80 animate-pulse-soft ambient-ring" />
+          <div className="relative mx-auto flex max-w-[86rem] flex-col items-start justify-between gap-8 px-5 md:flex-row md:items-center md:px-10">
+            <Reveal>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-brass">The first walkthrough</p>
+                <h2 className="mt-3 max-w-[22ch] font-display text-[clamp(2.4rem,4.5vw,3.8rem)] leading-[0.98]">
+                  Spend less time managing. More time caring.
+                </h2>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="flex flex-wrap gap-3">
+                <a href="#studios" className="btn-sheen inline-flex min-h-12 items-center gap-2 rounded-md bg-ivory px-6 text-[10px] font-semibold uppercase tracking-[0.12em] text-forest transition-colors hover:bg-white">
+                  Open a demo storefront <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+                <Link href="/login" className="inline-flex min-h-12 items-center gap-2 rounded-md border border-ivory/25 px-6 text-[10px] font-semibold uppercase tracking-[0.12em] text-ivory transition-colors hover:bg-white/10">
+                  Dashboard sign in
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </section>
       </main>
@@ -420,7 +472,7 @@ export async function PlatformLanding() {
               <Link href="/login" className="hover:text-forest">Sign in</Link>
               <a href="#ai" className="hover:text-forest">AI & approvals</a>
               <a href="#product" className="hover:text-forest">Product overview</a>
-              <a href={`${env.appUrl}/api/health`} className="inline-flex items-center gap-1 hover:text-forest">Service health <ArrowUpRight className="h-3 w-3" /></a>
+              <a href="/api/health" className="inline-flex items-center gap-1 hover:text-forest">Service health <ArrowUpRight className="h-3 w-3" /></a>
             </div>
           </div>
         </div>

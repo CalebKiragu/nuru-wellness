@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { env } from "@/lib/env";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   },
   description:
     "Nuru Wellness is a white-label storefront, booking and business platform for massage therapists and boutique spas.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(env.appUrl),
   icons: {
     icon: "/nuru-mark.svg",
   },
@@ -32,7 +33,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable}`}>
-      <body>{children}</body>
+      <body>
+        <noscript>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+        </noscript>
+        {children}
+      </body>
     </html>
   );
 }

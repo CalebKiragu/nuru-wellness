@@ -23,9 +23,9 @@ Final local gate for this delivery, run on **22 October 2026**. Every command be
 | --- | --- | --- |
 | Lint | `npm run lint` | **Pass** — 0 errors, 0 warnings |
 | Type check | `npm run typecheck` | **Pass** — no TypeScript errors |
-| Unit / integration | `npm test` | **Pass** — 5 files, 34 tests, 25.28 s |
-| Production build | `npm run build` | **Pass** — compiled in 12.9 s, 51 routes, 23 pages generated |
-| End-to-end | `npm run test:e2e` | **Pass** — 6 tests, 2.2 min |
+| Unit / integration | `npm test` | **Pass** — 6 files, 39 tests, 23.81 s |
+| Production build | `npm run build` | **Pass** — compiled in 9.7 s, 52 routes, 23 pages generated |
+| End-to-end | `npm run test:e2e` | **Pass** — 6 tests, 3.2 min |
 | Combined gate | `npm run verify` | **Pass** — lint + typecheck + tests + build (exit 0) |
 
 `npm run verify` runs ESLint, typecheck, Vitest and the production build. Playwright is run separately because it starts its own development server on port 3100 and a fresh database at `.nuru/e2e-pgdata`.
@@ -42,9 +42,9 @@ ESLint uses the Next.js `core-web-vitals` and TypeScript configs with the flat c
 ## Unit and integration tests (`npm test`)
 
 ```
-Test Files  5 passed (5)
-     Tests  34 passed (34)
-  Duration  25.28s (tests 67%, import 32%, transform 1%)
+Test Files  6 passed (6)
+     Tests  39 passed (39)
+  Duration  23.81s (tests 64%, import 35%, transform 1%)
 ```
 
 | Suite | Tests | What it proves |
@@ -54,20 +54,21 @@ Test Files  5 passed (5)
 | `tests/ai-approvals.test.ts` | 6 | A run persists `queued → awaiting_approval` with a hash-bound payload; tampering after preparation is rejected; an approved campaign executes as **simulated** and never claims delivery; an approved copy refresh changes the **draft only**; rejection has no side effects; runs, approvals and tool facts are tenant-scoped. |
 | `tests/storefront.test.ts` | 6 | Draft saves do not change the live site; publishing creates an immutable snapshot and increments the version; rollback creates a new version instead of deleting history; invalid configuration and a cross-tenant version are rejected; one tenant’s save cannot affect another; hostname normalisation strips ports/casing/trailing dots and never performs a membership lookup. |
 | `tests/demo-honesty.test.ts` | 6 | With no email provider a message is `simulated`; simulated messages do not leak across tenants; owner/manager/staff permission sets are correct; role labels are correct. |
+| `tests/url.test.ts` | 5 | Redirects reconstruct the visitor-facing origin from proxy headers instead of Render's internal `localhost:10000`; protocol-relative targets are rejected; same-origin checks accept proxied requests and reject foreign origins. |
 
 Database-backed suites create an isolated PGlite database per test file via `tests/helpers/database.ts`, apply the real migrations, and exercise the same service functions as the HTTP routes. `server-only` is aliased to a test stub in `vitest.config.mts`.
 
 ## End-to-end tests (`npm run test:e2e`)
 
 ```
-✓ 1  demo auto-login opens each workspace and admin without credentials (11.6s)
-✓ 2  a public booking appears immediately in the dashboard (21.3s)
-✓ 3  a seeded AI approval is reviewed and executed as simulated (11.9s)
-✓ 4  storefront edits publish and roll back without losing history (23.8s)
-✓ 5  demo tenants switch as separate branded storefronts (10.2s)
-✓ 6  every dashboard page and the platform admin render for an owner (40.2s)
+✓ 1  demo auto-login opens each workspace and admin without credentials (13.2s)
+✓ 2  a public booking appears immediately in the dashboard (36.9s)
+✓ 3  a seeded AI approval is reviewed and executed as simulated (17.5s)
+✓ 4  storefront edits publish and roll back without losing history (33.5s)
+✓ 5  demo tenants switch as separate branded storefronts (17.9s)
+✓ 6  every dashboard page and the platform admin render for an owner (54.0s)
 
-6 passed (2.2m)
+6 passed (3.2m)
 ```
 
 The runner deletes `.nuru/e2e-pgdata` before starting, boots `next dev` on port 3100, waits for `/api/health`, and runs serially (`workers: 1`) so seeded state is deterministic.
@@ -82,6 +83,20 @@ What the flows verify:
 6. All eleven dashboard routes return HTTP 200 with a visible heading and no application error, and the platform admin page renders both tenants.
 
 Playwright retains traces and screenshots only on failure; the final run produced none.
+
+## Responsive and motion QA
+
+Manual Chromium checks via Playwright, in addition to the automated suite:
+
+| Check | Result |
+| --- | --- |
+| Desktop landing at 1440×1000 | **Pass** — hero, marquee, studio cards, AI panel and closing CTA render after reveals |
+| Mobile landing at 390×844 | **Pass** — no horizontal overflow; header collapses to a single demo CTA |
+| Mobile Amani storefront at 390×844 | **Pass** — no horizontal overflow; hero, gallery and booking CTA remain usable |
+| `prefers-reduced-motion: reduce` | **Pass** — reveal content is immediately visible, ambient/ken-burns loops are disabled, and the hero is not left at `opacity: 0` |
+| Browser console | **Pass** — no application errors or hydration warnings on the checked pages |
+
+The reveal component renders identical markup on the server and client (visibility is applied after hydration), so reduced-motion and no-JavaScript visitors never receive hidden content. The root layout includes a `<noscript>` rule as a final fallback.
 
 ## Production smoke test (Render)
 
@@ -101,8 +116,8 @@ The live database was migrated and seeded automatically on the first request. Th
 
 ## Build
 
-- `next build` compiled successfully in 12.9 s.
-- 51 application routes were emitted (public pages, dashboard pages, preview, and API handlers).
+- `next build` compiled successfully in 9.7 s.
+- 52 application routes were emitted (public pages, dashboard pages, preview, and API handlers).
 - First Load JS shared by all: 103 kB.
 - The build's own type check and page-data collection completed without errors.
 - `@electric-sql/pglite` is kept as a server external package; it is not bundled into client output.
@@ -118,7 +133,7 @@ The live database was migrated and seeded automatically on the first request. Th
 - No load, soak, penetration or accessibility certification testing.
 - No cross-browser matrix beyond Chromium; no real mobile device testing.
 - No live PostgreSQL instance (PGlite only), no live OpenAI call and no live Resend delivery.
-- No production smoke test on Render from this environment.
+- No post-deployment smoke test of the new proxy-aware redirects from this environment yet; it is run immediately after the next Render deploy.
 
 These gaps are intentional for the MVP and are documented in [`LIMITATIONS.md`](LIMITATIONS.md).
 

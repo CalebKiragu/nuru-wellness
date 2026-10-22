@@ -1,0 +1,83 @@
+name: Keep the Render demo awake
+
+# Render's free web services spin down after ~15 minutes without traffic. This
+# workflow keeps the demo responsive for visitors until the window below ends.
+#
+# GitHub Actions cannot schedule a job more often than every 5 minutes. Each
+# run therefore performs two health checks two minutes apart, giving an
+# effective cadence of roughly every 2–3 minutes. Delete this workflow (or let
+# the window lapse) once the demo no longer needs it.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: nuru-demo-keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    name: Ping the public health endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    env:
+      # Five-day window, starting 22 October 2026. The job becomes a no-op
+      # afterwards, so the schedule can be removed at leisure.
+      KEEPALIVE_UNTIL: "2026-10-27T23:59:59Z"
+      DEMO_URL: "https://nuru-wellness.onrender.com"
+
+    steps:
+      - name: Check the keep-alive window
+        id: window
+        run: |
+          set -euo pipefail
+          if [ "$(date -u +%s)" -lt "$(date -u -d "$KEEPALIVE_UNTIL" +%s)" ]; then
+            echo "active=true" >> "$GITHUB_OUTPUT"
+            echo "Keep-alive is active until $KEEPALIVE_UNTIL."
+          else
+            echo "active=false" >> "$GITHUB_OUTPUT"
+            echo "Keep-alive window has ended; skipping pings."
+          fi
+
+      - name: Wake and verify the demo
+        if: steps.window.outputs.active == 'true'
+        run: |
+          set -euo pipefail
+
+          ping() {
+            local url="${DEMO_URL}/api/health?keepalive=$(date -u +%s)"
+            local attempt
+            for attempt in 1 2 3; do
+              echo "Ping attempt ${attempt}: ${url}"
+              if curl \
+                --silent \
+                --show-error \
+                --fail \
+                --location \
+                --max-time 75 \
+                --header "Cache-Control: no-cache" \
+                --header "User-Agent: nuru-demo-keep-alive/1.0" \
+                "$url"; then
+                echo
+                echo "Demo is awake."
+                return 0
+              fi
+              echo "Attempt ${attempt} failed; retrying in 15 seconds."
+              sleep 15
+            done
+            echo "All ping attempts failed." >&2
+            return 1
+          }
+
+          # First request may cold-start the free instance.
+          ping
+
+          # A second check two minutes later narrows the effective interval
+          # while staying within GitHub's five-minute cron minimum.
+          sleep 120
+          ping
