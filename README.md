@@ -10,7 +10,7 @@ Built for the specification in the project brief. The demo is deliberate about w
 
 Demo auto-login is enabled on this deployment: `/dashboard` opens as the active demo owner and `/admin` opens as the platform admin, with no credentials. Choose a studio on the landing page to switch the storefront; the dashboard follows the demo-selected studio.
 
-The deployment is the free `nuru-wellness` Render web service in Oregon. It uses the `nuru` database on the workspace's PostgreSQL instance. Free instances sleep after inactivity, so the first request can take up to a minute.
+The deployment is the free `nuru-wellness` Render web service in Oregon. It uses the `nuru` database on the workspace's PostgreSQL instance. Free instances sleep after inactivity; `.github/workflows/keep-alive.yml` pings the public health endpoint every five minutes (twice per run) to keep the demo responsive until **27 October 2026**. Remove or extend that workflow afterwards.
 
 > This deployment is for demonstration only. `DEMO_MODE` and `DEMO_AUTO_LOGIN` are enabled; do not put real customer data on it.
 

@@ -111,6 +111,12 @@ Deployed at **<https://nuru-wellness.onrender.com>** on 22 October 2026 (free we
 | Demo switch to Bahari, then `/dashboard` | **200** — Bahari House visible with auto-login |
 | Bahari storefront via demo cookie | **200** — Bahari headline rendered |
 | `GET /dashboard/bookings` with no cookie | **200** |
+| `POST /api/demo/switch` behind Render's proxy | **303** — `Location: https://nuru-wellness.onrender.com/`, no `localhost:10000` |
+| `POST /api/auth/logout` behind Render's proxy | **303** — `Location: https://nuru-wellness.onrender.com/` |
+| Landing HTML scan | **Pass** — no `localhost:10000` in delivered links |
+| Playwright click on **View storefront** | **Pass** — navigates to the public host and renders the selected studio |
+| Storefront and dashboard after a live demo switch | **Pass** — Bahari storefront and dashboard return 200 with no console errors |
+| `.github/workflows/keep-alive.yml` manual run | **Pass** — 2m04s, both health checks succeeded |
 
 The live database was migrated and seeded automatically on the first request. These checks confirm the deployed environment, not a local substitute.
 
@@ -133,7 +139,7 @@ The live database was migrated and seeded automatically on the first request. Th
 - No load, soak, penetration or accessibility certification testing.
 - No cross-browser matrix beyond Chromium; no real mobile device testing.
 - No live PostgreSQL instance (PGlite only), no live OpenAI call and no live Resend delivery.
-- No post-deployment smoke test of the new proxy-aware redirects from this environment yet; it is run immediately after the next Render deploy.
+- No load, soak or penetration testing of the keep-alive workflow; it is a demo availability convenience, not a production SLA mechanism.
 
 These gaps are intentional for the MVP and are documented in [`LIMITATIONS.md`](LIMITATIONS.md).
 
