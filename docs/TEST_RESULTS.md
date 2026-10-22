@@ -83,6 +83,22 @@ What the flows verify:
 
 Playwright retains traces and screenshots only on failure; the final run produced none.
 
+## Production smoke test (Render)
+
+Deployed at **<https://nuru-wellness.onrender.com>** on 22 October 2026 (free web service, Oregon; PostgreSQL database `nuru`).
+
+| Check | Result |
+| --- | --- |
+| `GET /api/health` | **200** — `status: ok`, `database: ok`, database name `nuru`, `demoMode: true` |
+| `GET /dashboard` with no cookie | **200** — auto-login banner and Amani workspace visible |
+| `GET /admin` with no cookie | **200** — platform overview visible |
+| `POST /api/auth/login` with a seeded owner | **200** — confirms `SESSION_SECRET` is configured and real sessions still work |
+| Demo switch to Bahari, then `/dashboard` | **200** — Bahari House visible with auto-login |
+| Bahari storefront via demo cookie | **200** — Bahari headline rendered |
+| `GET /dashboard/bookings` with no cookie | **200** |
+
+The live database was migrated and seeded automatically on the first request. These checks confirm the deployed environment, not a local substitute.
+
 ## Build
 
 - `next build` compiled successfully in 12.9 s.

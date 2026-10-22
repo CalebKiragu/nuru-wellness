@@ -1,6 +1,11 @@
 # Render blueprint for the Nuru Wellness demonstration deployment.
 # Replace ROOT_DOMAIN and NEXT_PUBLIC_APP_URL with the hostnames Render gives
 # you (or your verified custom domain) before applying the blueprint.
+#
+# Free workspaces allow one active free Postgres database. If one already
+# exists, Render rejects the database block below: create a `nuru` database
+# inside the existing instance and set DATABASE_URL on the web service
+# instead, then remove the `databases` block.
 services:
   - type: web
     name: nuru-wellness

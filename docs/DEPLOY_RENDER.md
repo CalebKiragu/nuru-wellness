@@ -4,6 +4,8 @@ This project targets Render with a Node web service and a managed PostgreSQL dat
 
 > Production should always set `DATABASE_URL`. Without it the app falls back to embedded PGlite on local disk, which is only appropriate for a single-instance demo or local development and does not survive a deploy.
 
+> Render free workspaces allow one active free Postgres database. If one already exists, create a separate `nuru` database inside that instance and point `DATABASE_URL` at it instead of applying the blueprint's `databases` block. This is how the hosted demo is configured.
+
 ## 1. Prerequisites
 
 - A Render account and this repository pushed to GitHub/GitLab.
