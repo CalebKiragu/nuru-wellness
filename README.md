@@ -4,6 +4,16 @@ A white-label wellness booking and business-management MVP for independent massa
 
 Built for the specification in the project brief. The demo is deliberate about what is real: bookings and dashboard records are persisted in the database; payments, SMS and email delivery are simulated unless a provider is explicitly configured.
 
+## Live demo
+
+**<https://nuru-wellness.onrender.com>**
+
+Demo auto-login is enabled on this deployment: `/dashboard` opens as the active demo owner and `/admin` opens as the platform admin, with no credentials. Choose a studio on the landing page to switch the storefront; the dashboard follows the demo-selected studio.
+
+The deployment is the free `nuru-wellness` Render web service in Oregon. It uses the `nuru` database on the workspace's PostgreSQL instance. Free instances sleep after inactivity, so the first request can take up to a minute.
+
+> This deployment is for demonstration only. `DEMO_MODE` and `DEMO_AUTO_LOGIN` are enabled; do not put real customer data on it.
+
 ---
 
 ## Stack

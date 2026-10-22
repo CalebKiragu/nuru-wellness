@@ -21,7 +21,7 @@ This project targets Render with a Node web service and a managed PostgreSQL dat
 5. Check `https://<service>.onrender.com/api/health`:
 
    ```json
-   { "status": "ok", "database": "ok", "demoMode": true, "aiProvider": "mock", "timestamp": "..." }
+   { "status": "ok", "database": "ok", "databaseName": "nuru", "demoMode": true, "autoLogin": true, "aiProvider": "mock", "timestamp": "..." }
    ```
 
 6. Replace the placeholder `NEXT_PUBLIC_APP_URL` and `ROOT_DOMAIN` values from `render.yaml` with the real hostname Render assigned, then redeploy.

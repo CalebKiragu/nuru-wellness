@@ -6,6 +6,12 @@ A guided ten-minute tour of Nuru Wellness. The demo is designed to be run from a
 >
 > **What is simulated:** outbound email/SMS, payments and media uploads. The UI labels these as `Simulated · not sent`, `demo` or `not configured`. Never present a simulated send as delivered.
 
+## Hosted demo
+
+The deployed demonstration is at **<https://nuru-wellness.onrender.com>**. `DEMO_MODE` and `DEMO_AUTO_LOGIN` are enabled, so `/dashboard` and `/admin` open without credentials. Free hosting sleeps when idle; the first request may take up to a minute.
+
+The local instructions below are the reproducible path if you need a fresh database or offline demo.
+
 ## Before you start
 
 ```bash
