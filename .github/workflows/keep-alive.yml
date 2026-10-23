@@ -73,6 +73,7 @@ jobs:
             LOOP_SECONDS=20400
           fi
 
+          echo "Keep-alive loop: ${LOOP_SECONDS}s at ${PING_INTERVAL_SECONDS}s intervals; window ends ${KEEPALIVE_UNTIL}."
           until_epoch=$(date -u -d "$KEEPALIVE_UNTIL" +%s)
           loop_end=$(( $(date -u +%s) + LOOP_SECONDS ))
           if [ "$loop_end" -gt "$until_epoch" ]; then

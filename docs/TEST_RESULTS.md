@@ -116,7 +116,8 @@ Deployed at **<https://nuru-wellness.onrender.com>** on 22 October 2026 (free we
 | Landing HTML scan | **Pass** — no `localhost:10000` in delivered links |
 | Playwright click on **View storefront** | **Pass** — navigates to the public host and renders the selected studio |
 | Storefront and dashboard after a live demo switch | **Pass** — Bahari storefront and dashboard return 200 with no console errors |
-| `.github/workflows/keep-alive.yml` manual run | **Pass** — 2m04s, both health checks succeeded |
+| `.github/workflows/keep-alive.yml` short-loop run | **Pass** — 2m38s; woke the cold instance, dispatched a successor with HTTP 204, and the successor started immediately |
+| `.github/workflows/keep-alive.yml` scheduled cron observation | **Limited** — GitHub fired the five-minute schedule only three times in fourteen hours (23:53, 02:23 and 07:45 UTC). The workflow now self-dispatches a 5h40m loop; the five-minute schedule is a recovery net, not the primary mechanism. |
 
 The live database was migrated and seeded automatically on the first request. These checks confirm the deployed environment, not a local substitute.
 
@@ -140,6 +141,8 @@ The live database was migrated and seeded automatically on the first request. Th
 - No cross-browser matrix beyond Chromium; no real mobile device testing.
 - No live PostgreSQL instance (PGlite only), no live OpenAI call and no live Resend delivery.
 - No load, soak or penetration testing of the keep-alive workflow; it is a demo availability convenience, not a production SLA mechanism.
+- The keep-alive loop intentionally holds one long GitHub Actions job (~5h40m) per handoff. It is bounded to the demo window and uses free runner minutes on this public repository; it is not a production availability pattern.
+- GitHub Actions' `schedule` trigger is best-effort and was observed running hours late. The self-dispatch handoff, not the cron entry, is what keeps the demo warm.
 
 These gaps are intentional for the MVP and are documented in [`LIMITATIONS.md`](LIMITATIONS.md).
 
