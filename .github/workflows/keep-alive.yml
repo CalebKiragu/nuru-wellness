@@ -1,35 +1,48 @@
 name: Keep the Render demo awake
 
-# Render's free web services spin down after ~15 minutes without traffic. This
-# workflow keeps the demo responsive for visitors until the window below ends.
+# Render's free web services spin down after ~15 minutes without traffic.
 #
-# GitHub Actions cannot schedule a job more often than every 5 minutes. Each
-# run therefore performs two health checks two minutes apart, giving an
-# effective cadence of roughly every 2–3 minutes. Delete this workflow (or let
-# the window lapse) once the demo no longer needs it.
+# GitHub's `schedule` trigger is best-effort: during 2026 it regularly fires
+# hours late. A five-minute cron therefore cannot keep a free Render instance
+# awake on its own. This workflow instead runs a bounded loop that pings every
+# 2.5 minutes, then dispatches its own successor before the six-hour job limit.
+# The schedule below stays as a recovery net if the chain is ever interrupted.
+#
+# The whole thing is deliberately time-boxed. Once KEEPALIVE_UNTIL passes, the
+# loop stops and no successor is dispatched. To stop early, cancel the active
+# run in the Actions tab (or `gh run cancel <id>`); the next loop will not start.
 
 on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      loop_seconds:
+        description: "How long this run should keep pinging (default 20400 = 5h40m)."
+        required: false
+        default: "20400"
+        type: string
 
-permissions: {}
+permissions:
+  actions: write
+  contents: read
 
 concurrency:
   group: nuru-demo-keep-alive
   cancel-in-progress: false
 
 jobs:
-  ping:
-    name: Ping the public health endpoint
+  keep-alive:
+    name: Keep the public demo warm
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 355
 
     env:
-      # Five-day window, starting 22 October 2026. The job becomes a no-op
-      # afterwards, so the schedule can be removed at leisure.
+      # Five-day window, starting 22 October 2026.
       KEEPALIVE_UNTIL: "2026-10-27T23:59:59Z"
       DEMO_URL: "https://nuru-wellness.onrender.com"
+      LOOP_SECONDS: ${{ inputs.loop_seconds || '20400' }}
+      PING_INTERVAL_SECONDS: "150"
 
     steps:
       - name: Check the keep-alive window
@@ -41,13 +54,30 @@ jobs:
             echo "Keep-alive is active until $KEEPALIVE_UNTIL."
           else
             echo "active=false" >> "$GITHUB_OUTPUT"
-            echo "Keep-alive window has ended; skipping pings."
+            echo "Keep-alive window has ended; no pings or re-dispatch."
           fi
 
-      - name: Wake and verify the demo
+      - name: Keep the demo awake
         if: steps.window.outputs.active == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          if ! [[ "${LOOP_SECONDS}" =~ ^[0-9]+$ ]] || [ "$LOOP_SECONDS" -lt 1 ]; then
+            echo "Invalid LOOP_SECONDS; using 20400."
+            LOOP_SECONDS=20400
+          fi
+          if [ "$LOOP_SECONDS" -gt 20400 ]; then
+            echo "Capping LOOP_SECONDS at 20400 to stay under the six-hour job limit."
+            LOOP_SECONDS=20400
+          fi
+
+          until_epoch=$(date -u -d "$KEEPALIVE_UNTIL" +%s)
+          loop_end=$(( $(date -u +%s) + LOOP_SECONDS ))
+          if [ "$loop_end" -gt "$until_epoch" ]; then
+            loop_end=$until_epoch
+          fi
 
           ping() {
             local url="${DEMO_URL}/api/health?keepalive=$(date -u +%s)"
@@ -61,7 +91,7 @@ jobs:
                 --location \
                 --max-time 75 \
                 --header "Cache-Control: no-cache" \
-                --header "User-Agent: nuru-demo-keep-alive/1.0" \
+                --header "User-Agent: nuru-demo-keep-alive/2.0" \
                 "$url"; then
                 echo
                 echo "Demo is awake."
@@ -70,14 +100,42 @@ jobs:
               echo "Attempt ${attempt} failed; retrying in 15 seconds."
               sleep 15
             done
-            echo "All ping attempts failed." >&2
+            echo "All ping attempts failed; will try again on the next cycle." >&2
             return 1
           }
 
-          # First request may cold-start the free instance.
-          ping
+          next_ping=$(date -u +%s)
+          while [ "$(date -u +%s)" -lt "$loop_end" ]; do
+            ping || true
 
-          # A second check two minutes later narrows the effective interval
-          # while staying within GitHub's five-minute cron minimum.
-          sleep 120
-          ping
+            next_ping=$((next_ping + PING_INTERVAL_SECONDS))
+            now=$(date -u +%s)
+            if [ "$next_ping" -gt "$now" ]; then
+              sleep $((next_ping - now))
+            else
+              # A slow failure should not cause an immediate second ping.
+              next_ping=$((now + PING_INTERVAL_SECONDS))
+            fi
+          done
+
+          if [ "$(date -u +%s)" -lt "$until_epoch" ]; then
+            echo "Dispatching the next keep-alive run."
+            status=$(curl \
+              --silent \
+              --show-error \
+              --output /tmp/dispatch-response.json \
+              --write-out "%{http_code}" \
+              --request POST \
+              --header "Authorization: Bearer ${GH_TOKEN}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/keep-alive.yml/dispatches" \
+              --data "{\"ref\":\"${GITHUB_REF_NAME}\"}")
+            echo "Dispatch HTTP ${status}."
+            if [ "$status" != "204" ]; then
+              cat /tmp/dispatch-response.json || true
+              exit 1
+            fi
+          else
+            echo "Keep-alive window ended; not re-dispatching."
+          fi

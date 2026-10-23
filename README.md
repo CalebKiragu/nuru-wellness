@@ -10,7 +10,7 @@ Built for the specification in the project brief. The demo is deliberate about w
 
 Demo auto-login is enabled on this deployment: `/dashboard` opens as the active demo owner and `/admin` opens as the platform admin, with no credentials. Choose a studio on the landing page to switch the storefront; the dashboard follows the demo-selected studio.
 
-The deployment is the free `nuru-wellness` Render web service in Oregon. It uses the `nuru` database on the workspace's PostgreSQL instance. Free instances sleep after inactivity; `.github/workflows/keep-alive.yml` pings the public health endpoint every five minutes (twice per run) to keep the demo responsive until **27 October 2026**. Remove or extend that workflow afterwards.
+The deployment is the free `nuru-wellness` Render web service in Oregon. It uses the `nuru` database on the workspace's PostgreSQL instance. Free instances sleep after inactivity; `.github/workflows/keep-alive.yml` runs a time-boxed, self-renewing keep-alive loop that pings the public health endpoint every 2.5 minutes until **27 October 2026**. GitHub's cron scheduler is best-effort (it can run hours late), so each loop hands off to a fresh run every ~5h40m; the five-minute schedule is only a recovery net. Cancel the active run or remove the workflow to stop it early.
 
 > This deployment is for demonstration only. `DEMO_MODE` and `DEMO_AUTO_LOGIN` are enabled; do not put real customer data on it.
 
@@ -245,7 +245,7 @@ A blueprint is included at `render.yaml`. The manual path:
 4. Deploy. Migrations run on the first request; in demo mode the seed also runs when the database is empty.
 5. Verify `/api/health` returns `{ "status": "ok" }`.
 
-For the free demo deployment, `.github/workflows/keep-alive.yml` pings the public health endpoint so Render does not spin the instance down between visitors. GitHub Actions cannot schedule below a five-minute interval, so each run performs two checks two minutes apart (roughly a 2–3 minute effective cadence). The workflow is time-boxed to end on **27 October 2026**; remove or extend it afterwards. Scheduled workflows only run from the default branch and may be delayed when GitHub is busy.
+For the free demo deployment, `.github/workflows/keep-alive.yml` keeps Render from spinning the instance down between visitors. GitHub Actions cannot schedule below five minutes, and its scheduled runs can be delayed by hours, so the workflow does not rely on cron alone: each run loops for up to 5h40m, pinging every 2.5 minutes, then dispatches its successor via `workflow_dispatch` before the six-hour job limit. The every-five-minute schedule remains as a recovery net. The whole chain is time-boxed to end on **27 October 2026**; cancel the active run and remove the workflow afterwards to stop it early.
 
 For branded tenant hostnames, add a wildcard custom domain (for example `*.nuru.example.com`) and set `ROOT_DOMAIN=nuru.example.com`. Render's shared `onrender.com` certificate does not cover arbitrary subdomains. Tenant domains are also stored in `tenant_domains`; hostname resolution is lookup-only and never authorizes dashboard access.
 

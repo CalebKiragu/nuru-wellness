@@ -91,16 +91,18 @@ The storefront resolves a tenant from the request hostname (plus the demo-switch
 5. Open **Assistant**, approve the seeded campaign, and confirm the result says **simulated**.
 6. Publish a storefront change and restore version 1.
 7. Sign in as `admin@nuru.demo` and open `/admin`.
-8. Confirm the GitHub keep-alive workflow (`.github/workflows/keep-alive.yml`) is enabled on the default branch.
+8. Confirm the GitHub keep-alive workflow (`.github/workflows/keep-alive.yml`) is enabled on the default branch and has an active run in the Actions tab.
 
 ### Keeping the free demo awake
 
-Render free web services spin down after about 15 minutes without inbound traffic. The repository includes a scheduled GitHub Actions workflow that pings `/api/health` to keep the demonstration warm.
+Render free web services spin down after about 15 minutes without inbound traffic. The repository includes a GitHub Actions workflow that pings `/api/health` to keep the demonstration warm.
 
-- GitHub Actions has a five-minute minimum for scheduled workflows. The workflow runs every five minutes and performs two health checks two minutes apart, giving an effective interval of roughly 2–3 minutes.
-- The workflow is deliberately time-boxed: it stops pinging after `KEEPALIVE_UNTIL` (`2026-10-27T23:59:59Z` in the current file). Delete or edit the workflow afterwards.
-- It is a demo convenience, not a production availability strategy. Use a paid Render instance or a proper uptime monitor for a real service.
-- Scheduled workflows only run from the repository default branch and can be delayed during periods of high GitHub load.
+- GitHub Actions has a five-minute minimum for scheduled workflows, and in 2026 its `schedule` trigger is regularly delayed by hours. A plain five-minute cron therefore cannot be trusted to keep a free Render instance awake.
+- Each run is a bounded loop: it pings every 2.5 minutes for up to 5h40m, then calls the GitHub API with `workflow_dispatch` to start its successor before the six-hour job limit. The five-minute `schedule` entry is only a recovery net if the chain is interrupted.
+- The workflow is deliberately time-boxed: `KEEPALIVE_UNTIL` is `2026-10-27T23:59:59Z`. After that, the loop stops and no successor is dispatched.
+- To stop early, cancel the active run in the Actions tab (or `gh run cancel <run-id>`) and remove or disable the workflow. Removing the file does not cancel a run that is already in progress.
+- The long-running job uses free GitHub-hosted runner time on this public repository. It is a demo convenience, not a production availability strategy. Use a paid Render instance or a dedicated uptime monitor for a real service.
+- Scheduled workflows only run from the repository default branch, and the first run after adding the workflow may need to be started manually.
 
 ## 7. Troubleshooting
 
@@ -113,7 +115,7 @@ Render free web services spin down after about 15 minutes without inbound traffi
 | Demo sign-in buttons missing | `DEMO_MODE` is not `true`, or the deployment is a non-demo environment. |
 | Emails show `simulated` | Expected without `RESEND_API_KEY`/`EMAIL_FROM`. This is deliberate and is not an error. |
 | Seed did not run | The database already contains tenants, or `DEMO_MODE=false`. Run `npm run db:seed` manually if appropriate. |
-| Free instance sleeps and first request is slow | Render free/starter instances spin down. The first request also runs migrations. The `.github/workflows/keep-alive.yml` workflow pings the demo every five minutes (two checks per run) for a bounded demo window. |
+| Free instance sleeps and first request is slow | Render free/starter instances spin down. The first request also runs migrations. `.github/workflows/keep-alive.yml` keeps a bounded, self-renewing loop running that pings every 2.5 minutes; check the Actions tab and cancel/restart the run if the chain is interrupted. |
 
 ## 8. Operational notes and caveats
 
